@@ -1,43 +1,61 @@
 class GreedyStrategy:
+    """
+    Busca Gulosa (Greedy Best-First Search).
+
+    A cada passo, escolhe o vizinho com o menor custo de terreno,
+    sem considerar o custo acumulado do caminho percorrido.
+    Usa recursão para explorar os nós.
+    """
 
     def __init__(self, maze):
-        self.maze = maze
-        self.graph = self.maze.getGraph()
-        self.visited = []
-        self.finishFound = False
+        self.maze = maze # Labirinto com o grafo e a matriz
+        self.graph = self.maze.getGraph() # Obtém o grafo do labirinto
+        self.visited = [] # Lista de nós visitados na ordem de exploração
+        self.finishFound = False # Flag para parar a recursão ao encontrar o destino
 
     def run(self, current=None):
+        # Na primeira chamada, começa pelo primeiro nó do grafo (canto superior esquerdo)
         if current is None:
             current = list(self.graph.nodes(data=True))[0]
 
+        # Pega os índices dos vizinhos do nó atual
         nAux = list(self.graph.neighbors(current[0]))
 
+        # Marca o nó atual como visitado se o destino ainda não foi encontrado
         if not self.finishFound:
             self.visited.append(current[0])
 
+        # Se chegou ao destino, para a recursão
         if self.__isFinish(current):
             return
 
+        # Filtra os vizinhos removendo paredes e monta a lista de vizinhos válidos
         neighbors = []
         for i in nAux:
             node = self.graph.nodes[i]
             if self.__isWall(node):
                 continue
-
             neighbors.append((i, self.graph.nodes[i]))
 
+        # Ordena os vizinhos pelo custo do terreno (menor custo primeiro)
         neighbors = sorted(neighbors, key=lambda n: int(n[1]["cost"]))
+
+        # Visita os vizinhos em ordem de custo, de forma recursiva, se ainda não foram visitados
         for n in neighbors:
             if n[0] not in self.visited:
                 self.run(current=n)
 
     def getResolutionPath(self):
+        # Retorna a lista de nós visitados (o caminho percorrido pela busca)
         return self.visited
 
     def __isWall(self, node):
+        # Verifica se o nó é uma parede ("#")
         return node["terrain"] == "#"
 
     def __isFinish(self, node):
+        # Verifica se o nó é o destino ("F")
+        # Se for, ativa a flag para parar a recursão
         if self.finishFound or node[1]["terrain"] == "F":
             self.finishFound = True
             return True
