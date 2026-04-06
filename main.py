@@ -17,6 +17,8 @@ metrics = TimerMetric()
 maze = MazeBuilder(size=arguments.size, walls=arguments.walls)
 maze.createMaze()  # Gera a matriz do labirinto com terrenos, paredes, início e fim
 
+maze.showMatrix()
+
 # Seleciona o algoritmo de busca escolhido pelo usuário (ex: breadth, depth, astar, greedy)
 strategyContext = StrategyContext(strategy=arguments.strategy)
 strategy = strategyContext.get()(maze=maze)  # Instancia o algoritmo com o labirinto
