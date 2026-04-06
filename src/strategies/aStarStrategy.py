@@ -71,8 +71,8 @@ class AStarStrategy:
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
-        print(f"Nós expandidos para busca em largura: {self.visited}")
-        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
+        print(f"Nós expandidos para busca em A*: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em A*: {self.totalCost}")
         return self.visited
 
     def __isWall(self, node):
@@ -93,11 +93,11 @@ class AStarStrategy:
 
     def __actualDistance(self, currentNode):
         # Acumula o custo do terreno do nó atual ao custo total do caminho
-        self.pathSum = sum(self.visite)
+        # self.pathSum = sum(self.visite)
         self.pathSum += int(currentNode[1]["cost"])
 
     def __euclideanDistance(self, currentNode, goalNode):
-        # Distância euclidiana entre dois nós (reta entre dois pontos) nao ta em uso
+        # Distância euclidiana entre dois nós (reta entre dois pontos) nao ta em uso porque no nosso grid não é possivel movimentação em diagonais.
         x = (goalNode["coordinates"][0] - currentNode["coordinates"][0]) ** 2
         y = (goalNode["coordinates"][1] - currentNode["coordinates"][1]) ** 2
         return math.sqrt(x + y)

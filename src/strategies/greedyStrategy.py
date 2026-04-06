@@ -49,8 +49,8 @@ class GreedyStrategy:
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
-        print(f"Nós expandidos para busca em largura: {self.visited}")
-        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
+        print(f"Nós expandidos para busca em gulosa: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em gulosa: {self.totalCost}")
         return self.visited
 
     def __isWall(self, node):
