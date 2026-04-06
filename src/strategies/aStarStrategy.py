@@ -50,10 +50,11 @@ class AStarStrategy:
 
                 # Ignora nós que já foram visitados
                 if n in self.visited:
-                    self.pathSum -= content["cost"]
                     continue
 
                 # Adiciona o nó na fila
+                content["pathCost"] = current[1]["cost"] + content["cost"]
+                # print(content)
                 openList.append((n, content))
 
             # Reordena a fila pelo valor de f (custo real + estimativa) para cada nó candidato
@@ -84,7 +85,7 @@ class AStarStrategy:
         # f(n) = g(n) + h(n)
         # g(n) = custo acumulado do caminho percorrido até o nó atual
         # h(n) = distância de Manhattan estimada do nó atual até o destino
-        actualDistance = self.pathSum + current["cost"]
+        actualDistance = current["pathCost"]
         estimateDistance = self.__manhatanDistance(current, finish)
         return actualDistance + estimateDistance
 
@@ -94,11 +95,6 @@ class AStarStrategy:
 
     def __actualDistance(self, currentNode):
         # Acumula o custo do terreno do nó atual ao custo total do caminho
-<<<<<<< HEAD
-        self.pathSum = sum(self.visited)
-=======
-        # self.pathSum = sum(self.visite)
->>>>>>> 1cc7c070cf8c0b7c71d67e2abbe40295545a729a
         self.pathSum += int(currentNode[1]["cost"])
 
     def __euclideanDistance(self, currentNode, goalNode):
