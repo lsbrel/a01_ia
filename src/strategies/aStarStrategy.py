@@ -12,13 +12,13 @@ class AStarStrategy:
     """
 
     def __init__(self, maze):
-        self.maze = maze # Labirinto com o grafo e a matriz
-        self.graph = self.maze.getGraph() # Obtém o grafo do labirinto
-        self.visited = [] # Lista de nós visitados na ordem de exploração
-        self.probabilityVisited = [] # (não utilizado atualmente)
-        self.pathSum = 0 # Custo acumulado do caminho percorrido até agora (g)
-        self.finishFound = False # Flag para parar a busca ao encontrar o destino
-        self.totalCost = 0 # Custo do caminho
+        self.maze = maze  # Labirinto com o grafo e a matriz
+        self.graph = self.maze.getGraph()  # Obtém o grafo do labirinto
+        self.visited = []  # Lista de nós visitados na ordem de exploração
+        self.probabilityVisited = []  # (não utilizado atualmente)
+        self.pathSum = 0  # Custo acumulado do caminho percorrido até agora (g)
+        self.finishFound = False  # Flag para parar a busca ao encontrar o destino
+        self.totalCost = 0  # Custo do caminho
 
     def run(self, current=None):
         # Fila de nós a explorar
@@ -66,7 +66,7 @@ class AStarStrategy:
 
             # Marca o nó atual como visitado e acumula o custo do terreno
             self.visited.append(current[0])
-            self.totalCost += current[1]['cost']
+            self.totalCost += current[1]["cost"]
             self.__actualDistance(current)
 
     def getResolutionPath(self):
