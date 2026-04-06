@@ -21,20 +21,37 @@ maze.createMaze()  # Gera a matriz do labirinto com terrenos, paredes, início e
 strategyContext = StrategyContext(strategy=arguments.strategy)
 strategy = strategyContext.get()(maze=maze)  # Instancia o algoritmo com o labirinto
 
-# Só executa se um algoritmo válido foi escolhido
-if strategy:
+if arguments.strategy == "all":
+    for strategy in ["breadth", "depth", "greedy", "astar"]:
+        strategyContext = StrategyContext(strategy=strategy)
+        strategy = strategyContext.get()(maze=maze)
 
-    metrics.start()  # Inicia o cronômetro
+        if strategy:
+            metrics.start()
 
-    maze.showMatrix()   # Exibe a matriz do labirinto no terminal
-    strategy.run()      # Executa o algoritmo de busca para encontrar o caminho
-    print(strategy.getResolutionPath())  # Mostra os nós visitados durante a busca
+            strategy.run()
+            print(strategy.getResolutionPath())
 
-    metrics.stop()   # Para o cronômetro
-    metrics.show()   # Exibe o tempo total de execução
+            metrics.stop()
+            metrics.show()
 
-    # Cria a animação mostrando visualmente o caminho percorrido pelo algoritmo no grafo
-    animtation = MazeResolutionAnimation(
-        maze=maze.getGraph(), path=strategy.getResolutionPath()
-    )
-    animtation.run()  # Abre a janela gráfica com a animação
+            animtation = MazeResolutionAnimation(
+                maze=maze.getGraph(), path=strategy.getResolutionPath()
+            )
+            animtation.run()
+
+else:
+    strategyContext = StrategyContext(strategy=arguments.strategy)
+    strategy = strategyContext.get()(maze=maze)
+
+    if strategy:
+        metrics.start()
+        strategy.run()
+
+        metrics.stop()
+        metrics.show()
+
+        animtation = MazeResolutionAnimation(
+            maze=maze.getGraph(), path=strategy.getResolutionPath()
+        )
+        animtation.run()

@@ -26,5 +26,5 @@ class ArgumentParser:
         # --strategy: qual algoritmo de busca usar para resolver o labirinto
         # Opções disponíveis: busca em largura, profundidade, A* e guloso
         self.parser.add_argument(
-            "--strategy", choices=["breadth", "depth", "astar", "greedy"]
+            "--strategy", choices=["breadth", "depth", "astar", "greedy", "all"]
         )

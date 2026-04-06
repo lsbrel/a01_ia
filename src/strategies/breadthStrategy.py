@@ -12,6 +12,7 @@ class BreadthFirstSearchStrategy:
     def __init__(self, maze):
         self.maze = maze # Labirinto com o grafo e a matriz
         self.visited = [] # Lista de nós visitados na ordem de exploração
+        self.totalCost = 0
 
     def run(self):
         graph = self.maze.getGraph() # Obtém o grafo do labirinto
@@ -34,6 +35,8 @@ class BreadthFirstSearchStrategy:
 
                 # Marca o nó como visitado
                 self.visited.append(current[0])
+                self.totalCost += current[1]["cost"]
+
                 neighbors = list(graph.neighbors(current[0]))
 
                 # Se chegou ao destino, para a busca
@@ -46,6 +49,8 @@ class BreadthFirstSearchStrategy:
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
+        print(f"Nós expandidos para busca em largura: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
         return self.visited
 
     def __isWall(self, node):

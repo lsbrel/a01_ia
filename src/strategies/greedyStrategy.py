@@ -8,10 +8,11 @@ class GreedyStrategy:
     """
 
     def __init__(self, maze):
-        self.maze = maze # Labirinto com o grafo e a matriz
-        self.graph = self.maze.getGraph() # Obtém o grafo do labirinto
-        self.visited = [] # Lista de nós visitados na ordem de exploração
-        self.finishFound = False # Flag para parar a recursão ao encontrar o destino
+        self.maze = maze  # Labirinto com o grafo e a matriz
+        self.graph = self.maze.getGraph()  # Obtém o grafo do labirinto
+        self.visited = []  # Lista de nós visitados na ordem de exploração
+        self.finishFound = False  # Flag para parar a recursão ao encontrar o destino
+        self.totalCost = 0
 
     def run(self, current=None):
         # Na primeira chamada, começa pelo primeiro nó do grafo (canto superior esquerdo)
@@ -24,6 +25,7 @@ class GreedyStrategy:
         # Marca o nó atual como visitado se o destino ainda não foi encontrado
         if not self.finishFound:
             self.visited.append(current[0])
+            self.totalCost += current[1]["cost"]
 
         # Se chegou ao destino, para a recursão
         if self.__isFinish(current):
@@ -47,6 +49,8 @@ class GreedyStrategy:
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
+        print(f"Nós expandidos para busca em largura: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
         return self.visited
 
     def __isWall(self, node):

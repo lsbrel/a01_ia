@@ -9,21 +9,26 @@ class DepthFirstSearchStrategy:
     """
 
     def __init__(self, maze):
-        self.maze = maze # Labirinto com o grafo e a matriz
-        self.visited = [] # Lista de nós visitados na ordem de exploração
+        self.maze = maze  # Labirinto com o grafo e a matriz
+        self.visited = []  # Lista de nós visitados na ordem de exploração
+        self.totalCost = 0
 
     def run(self):
-        graph = self.maze.getGraph() # Obtém o grafo do labirinto
+        graph = self.maze.getGraph()  # Obtém o grafo do labirinto
 
         # Pilha de nós a visitar — começa pelo primeiro nó (canto superior esquerdo)
-        nodesToVist = deque() # Cria lista otimizada para inserção e remoção de elementos
-        nodesToVist.append(list(graph.nodes(data=True))[0]) # Adiciona o primeiro nó na lista
+        nodesToVist = (
+            deque()
+        )  # Cria lista otimizada para inserção e remoção de elementos
+        nodesToVist.append(
+            list(graph.nodes(data=True))[0]
+        )  # Adiciona o primeiro nó na lista
 
         # Enquanto a lista não estiver vazia, continua a busca
         while len(nodesToVist) != 0:
             # Retira o nó do topo da pilha
             # O último nó adicionado será o próximo a ser explorado
-            current = nodesToVist.pop() # Remove o último nó da lista
+            current = nodesToVist.pop()  # Remove o último nó da lista
 
             # Só processa se ainda não visitou este nó (nó pode ter sido visitado em outro caminho)
             if current[0] not in self.visited:
@@ -34,6 +39,8 @@ class DepthFirstSearchStrategy:
 
                 # Marca o nó como visitado
                 self.visited.append(current[0])
+                self.totalCost += current[1]["cost"]
+
                 neighbors = list(graph.neighbors(current[0]))
 
                 # Se chegou ao destino, para a busca
@@ -46,6 +53,8 @@ class DepthFirstSearchStrategy:
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
+        print(f"Nós expandidos para busca em largura: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
         return self.visited
 
     def __isFinish(self, node):

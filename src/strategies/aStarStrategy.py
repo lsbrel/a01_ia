@@ -18,6 +18,7 @@ class AStarStrategy:
         self.probabilityVisited = [] # (não utilizado atualmente)
         self.pathSum = 0 # Custo acumulado do caminho percorrido até agora (g)
         self.finishFound = False # Flag para parar a busca ao encontrar o destino
+        self.totalCost = 0 # Custo do caminho
 
     def run(self, current=None):
         # Fila de nós a explorar
@@ -65,10 +66,13 @@ class AStarStrategy:
 
             # Marca o nó atual como visitado e acumula o custo do terreno
             self.visited.append(current[0])
+            self.totalCost += current[1]['cost']
             self.__actualDistance(current)
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
+        print(f"Nós expandidos para busca em largura: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
         return self.visited
 
     def __isWall(self, node):
