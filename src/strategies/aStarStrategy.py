@@ -93,6 +93,7 @@ class AStarStrategy:
 
     def __actualDistance(self, currentNode):
         # Acumula o custo do terreno do nó atual ao custo total do caminho
+        self.pathSum = sum(self.visite)
         self.pathSum += int(currentNode[1]["cost"])
 
     def __euclideanDistance(self, currentNode, goalNode):

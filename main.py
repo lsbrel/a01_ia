@@ -21,10 +21,6 @@ maze.createMaze()  # Gera a matriz do labirinto com terrenos, paredes, início e
 
 maze.showMatrix()
 
-# Seleciona o algoritmo de busca escolhido pelo usuário (ex: breadth, depth, astar, greedy)
-strategyContext = StrategyContext(strategy=arguments.strategy)
-strategy = strategyContext.get()(maze=maze)  # Instancia o algoritmo com o labirinto
-
 if arguments.strategy == "all":
     for strategy in ["breadth", "depth", "greedy", "astar"]:
         strategyContext = StrategyContext(strategy=strategy)
