@@ -53,8 +53,8 @@ class DepthFirstSearchStrategy:
 
     def getResolutionPath(self):
         # Retorna a lista de nós visitados (o caminho percorrido pela busca)
-        print(f"Nós expandidos para busca em largura: {self.visited}")
-        print(f"Custo do caminho expandidos para busca em largura: {self.totalCost}")
+        print(f"Nós expandidos para busca em profundidade: {self.visited}")
+        print(f"Custo do caminho expandidos para busca em profundidade: {self.totalCost}")
         return self.visited
 
     def __isFinish(self, node):

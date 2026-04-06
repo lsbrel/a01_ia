@@ -12,14 +12,14 @@ class StrategyContext:
     """
 
     def __init__(self, strategy: str):
-        self.strategy = strategy  # Nome do algoritmo escolhido (ex: "astar", "breadth")
+        self.strategy = strategy  # Nome do algoritmo escolhido
 
         # Dicionário que mapeia o nome do algoritmo para sua classe
         self.strategies = {
-            "astar": AStarStrategy,              # Busca A* (custo real + heurística)
-            "greedy": GreedyStrategy,            # Busca gulosa (só heurística, sem custo real)
-            "depth": DepthFirstSearchStrategy,   # Busca em profundidade (DFS)
-            "breadth": BreadthFirstSearchStrategy,  # Busca em largura (BFS)
+            "astar": AStarStrategy, # Busca A*
+            "greedy": GreedyStrategy, # Busca gulosa
+            "depth": DepthFirstSearchStrategy, # Busca em profundidade
+            "breadth": BreadthFirstSearchStrategy, # Busca em largura
         }
 
     def get(self):
