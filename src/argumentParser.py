@@ -23,6 +23,9 @@ class ArgumentParser:
         # --walls: quantidade de paredes aleatórias a inserir no labirinto
         self.parser.add_argument("--walls", type=int)
 
+        # --visibleWalls define se a parede sera visivel no grafo
+        self.parser.add_argument("--visibleWalls", action="store_true")
+
         # --strategy: qual algoritmo de busca usar para resolver o labirinto
         # Opções disponíveis: busca em largura, profundidade, A* e guloso
         self.parser.add_argument(

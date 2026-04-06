@@ -8,19 +8,20 @@ class MazeBuilder:
     posiciona as paredes, define o início/fim e monta o grafo de conexões entre células.
     """
 
-    def __init__(self, size: int, walls: int):
-        self.size = size    # Tamanho do labirinto (ex: 5 → grade 5x5)
+    def __init__(self, size: int, walls: int, visibleWalls: bool):
+        self.size = size  # Tamanho do labirinto (ex: 5 → grade 5x5)
         self.walls = walls  # Quantidade de paredes a inserir aleatoriamente
+        self.visibleWalls = visibleWalls
         self.boostrap()
 
     def boostrap(self):
         # Mapeamento de cada tipo de terreno para sua cor na animação
         self.terrains = {
-            "#": "gray",       # Parede — bloqueio, não pode passar
-            "G": "green",      # Grama — custo baixo para atravessar
-            "L": "brown",      # Lama — custo alto para atravessar
-            "I": "tab:blue",   # Início (Initial) — ponto de partida
-            "F": "tab:blue",   # Fim (Finish) — destino a alcançar
+            "#": "gray",  # Parede — bloqueio, não pode passar
+            "G": "green",  # Grama — custo baixo para atravessar
+            "L": "brown",  # Lama — custo alto para atravessar
+            "I": "tab:blue",  # Início (Initial) — ponto de partida
+            "F": "tab:blue",  # Fim (Finish) — destino a alcançar
         }
 
         # Custo de movimento por tipo de terreno (paredes e pontos especiais têm custo 0)
@@ -164,8 +165,10 @@ class MazeBuilder:
     def __isWall(self, pos):
         # Atualmente retorna sempre False — ou seja, as paredes também entram no grafo.
         # Para excluir paredes do grafo, bastaria remover a linha abaixo e ativar a segunda.
-        return False  # caso retorne falso monta grafo com as paredes também
-        return self.matrixFlat[pos] == "#"
+        if self.visibleWalls:
+            return False
+        else:
+            return self.matrixFlat[pos] == "#"
 
     def __resolveCoordinates(self, index):
         # Converte um índice linear de volta para coordenadas (linha, coluna) na grade
