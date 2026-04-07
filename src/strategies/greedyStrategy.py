@@ -1,3 +1,6 @@
+import math
+
+
 class GreedyStrategy:
     """
     Busca Gulosa (Greedy Best-First Search).
@@ -13,6 +16,7 @@ class GreedyStrategy:
         self.visited = []  # Lista de nós visitados na ordem de exploração
         self.finishFound = False  # Flag para parar a recursão ao encontrar o destino
         self.totalCost = 0
+        self.finishNode = list(self.graph.nodes(data=True))[-1]
 
     def run(self, current=None):
         # Na primeira chamada, começa pelo primeiro nó do grafo (canto superior esquerdo)
@@ -40,7 +44,10 @@ class GreedyStrategy:
             neighbors.append((i, self.graph.nodes[i]))
 
         # Ordena os vizinhos pelo custo do terreno (menor custo primeiro)
-        neighbors = sorted(neighbors, key=lambda n: int(n[1]["cost"]))
+        neighbors = sorted(
+            neighbors,
+            key=lambda n: int(self.__euclideanDistance(n[1], self.finishNode[1])),
+        )
 
         # Visita os vizinhos em ordem de custo, de forma recursiva, se ainda não foram visitados
         for n in neighbors:
@@ -65,3 +72,13 @@ class GreedyStrategy:
             return True
         else:
             return False
+
+    def __manhattanDistance(self, currentNode, goalNode):
+        x = abs(currentNode["coordinates"][0] - goalNode["coordinates"][0])
+        y = abs(currentNode["coordinates"][1] - goalNode["coordinates"][1])
+        return x + y
+
+    def __euclideanDistance(self, currentNode, goalNode):
+        x = (goalNode["coordinates"][0] - currentNode["coordinates"][0]) ** 2
+        y = (goalNode["coordinates"][1] - currentNode["coordinates"][1]) ** 2
+        return math.sqrt(x + y)
