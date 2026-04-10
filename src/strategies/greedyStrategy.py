@@ -73,11 +73,6 @@ class GreedyStrategy:
         else:
             return False
 
-    def __manhattanDistance(self, currentNode, goalNode):
-        x = abs(currentNode["coordinates"][0] - goalNode["coordinates"][0])
-        y = abs(currentNode["coordinates"][1] - goalNode["coordinates"][1])
-        return x + y
-
     def __euclideanDistance(self, currentNode, goalNode):
         x = (goalNode["coordinates"][0] - currentNode["coordinates"][0]) ** 2
         y = (goalNode["coordinates"][1] - currentNode["coordinates"][1]) ** 2
