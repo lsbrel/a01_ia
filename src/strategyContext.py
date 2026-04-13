@@ -5,11 +5,6 @@ from src.strategies.greedyStrategy import GreedyStrategy
 
 
 class StrategyContext:
-    """
-    Implementa o padrão de projeto Strategy:
-    recebe o nome do algoritmo escolhido pelo usuário e devolve a classe correspondente,
-    sem que o código principal precise saber detalhes de cada algoritmo.
-    """
 
     def __init__(self, strategy: str):
         self.strategy = strategy  # Nome do algoritmo escolhido
