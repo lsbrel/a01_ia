@@ -1,79 +1,99 @@
-import math
+import heapq
 
 
 class GreedyStrategy:
     """
     Busca Gulosa (Greedy Best-First Search).
 
-    A cada passo, escolhe o vizinho com o menor custo de terreno,
-    sem considerar o custo acumulado do caminho percorrido.
-    Usa recursão para explorar os nós.
+    Usa uma fila de prioridade (heap) para sempre expandir
+    o nó com menor heurística (distância estimada até o objetivo).
     """
 
     def __init__(self, maze):
-        self.maze = maze  # Labirinto com o grafo e a matriz
-        self.graph = self.maze.getGraph()  # Obtém o grafo do labirinto
-        self.visited = []  # Lista de nós visitados na ordem de exploração
-        self.finishFound = False  # Flag para parar a recursão ao encontrar o destino
+        self.maze = maze
+        self.graph = self.maze.getGraph()
+
+        self.visited = set()        # Nós já visitados (set para busca O(1))
+        self.path = []              # Ordem de expansão dos nós
+        self.came_from = {}         # Para reconstruir o caminho: nó → de onde veio
         self.totalCost = 0
+
         self.finishNode = list(self.graph.nodes(data=True))[-1]
 
-    def run(self, current=None):
-        # Na primeira chamada, começa pelo primeiro nó do grafo (canto superior esquerdo)
-        if current is None:
-            current = list(self.graph.nodes(data=True))[0]
+    def run(self):
+        # Nó inicial
+        start = list(self.graph.nodes(data=True))[0]
+        self.came_from[start[0]] = None  # Nó inicial não tem pai
 
-        # Pega os índices dos vizinhos do nó atual
-        nAux = list(self.graph.neighbors(current[0]))
+        # Contador para desempate quando dois nós têm a mesma heurística
+        counter = 0
 
-        # Marca o nó atual como visitado se o destino ainda não foi encontrado
-        if not self.finishFound:
-            self.visited.append(current[0])
-            self.totalCost += current[1]["cost"]
+        # Heap: (heurística, contador, node_id, node_data)
+        heap = []
+        heapq.heappush(heap, (0, counter, start[0], start[1]))
 
-        # Se chegou ao destino, para a recursão
-        if self.__isFinish(current):
-            return
+        while heap:
+            _, _, node_id, node_data = heapq.heappop(heap)
 
-        # Filtra os vizinhos removendo paredes e monta a lista de vizinhos válidos
-        neighbors = []
-        for i in nAux:
-            node = self.graph.nodes[i]
-            if self.__isWall(node):
+            if node_id in self.visited:
                 continue
-            neighbors.append((i, self.graph.nodes[i]))
 
-        # Ordena os vizinhos pelo custo do terreno (menor custo primeiro)
-        neighbors = sorted(
-            neighbors,
-            key=lambda n: int(self.__euclideanDistance(n[1], self.finishNode[1])),
-        )
+            # Marca o nó como visitado e registra na ordem de expansão
+            self.visited.add(node_id)
+            self.path.append(node_id)
 
-        # Visita os vizinhos em ordem de custo, de forma recursiva, se ainda não foram visitados
-        for n in neighbors:
-            if n[0] not in self.visited:
-                self.run(current=n)
+            # Chegou no destino
+            if self.__isFinish((node_id, node_data)):
+                return
+
+            # Explora vizinhos
+            for neighbor_id in self.graph.neighbors(node_id):
+                neighbor = self.graph.nodes[neighbor_id]
+
+                if self.__isWall(neighbor):
+                    continue
+
+                if neighbor_id not in self.visited:
+                    # Registra de onde cada vizinho foi alcançado (apenas na primeira vez)
+                    if neighbor_id not in self.came_from:
+                        self.came_from[neighbor_id] = node_id
+
+                    h = self.__manhattanDistance(neighbor, self.finishNode[1])
+                    counter += 1
+                    heapq.heappush(heap, (h, counter, neighbor_id, neighbor))
 
     def getResolutionPath(self):
-        # Retorna a lista de nós visitados (o caminho percorrido pela busca)
-        print(f"Nós expandidos para busca em gulosa: {self.visited}")
-        print(f"Custo do caminho expandidos para busca em gulosa: {self.totalCost}")
-        return self.visited
+        # Reconstrói o caminho do início ao fim percorrendo came_from de trás pra frente
+        finish_id = self.finishNode[0]
+
+        path = []
+        current = finish_id
+        while current is not None:
+            path.append(current)
+            current = self.came_from.get(current)
+        path.reverse()
+
+        # Calcula o custo real somando apenas os nós que fazem parte do caminho
+        self.totalCost = sum(self.graph.nodes[n]["cost"] for n in path)
+
+        print(f"Nós expandidos (busca gulosa): {len(self.path)}")
+        print(f"Sequência de expansão: {self.path}")
+        print(f"Caminho encontrado: {path}")
+        print(f"Custo do caminho para busca gulosa: {self.totalCost}")
+        return path
+
+    def getExpansionOrder(self):
+        # Retorna a lista de nós na ordem em que foram expandidos durante a busca
+        return self.path
 
     def __isWall(self, node):
-        # Verifica se o nó é uma parede ("#")
         return node["terrain"] == "#"
 
     def __isFinish(self, node):
-        # Verifica se o nó é o destino ("F")
-        # Se for, ativa a flag para parar a recursão
-        if self.finishFound or node[1]["terrain"] == "F":
-            self.finishFound = True
-            return True
-        else:
-            return False
+        return node[1]["terrain"] == "F"
 
-    def __euclideanDistance(self, currentNode, goalNode):
-        x = (goalNode["coordinates"][0] - currentNode["coordinates"][0]) ** 2
-        y = (goalNode["coordinates"][1] - currentNode["coordinates"][1]) ** 2
-        return math.sqrt(x + y)
+    def __manhattanDistance(self, currentNode, goalNode):
+        # Distância de Manhattan: soma das diferenças absolutas das coordenadas x e y
+        x = abs(goalNode["coordinates"][0] - currentNode["coordinates"][0])
+        y = abs(goalNode["coordinates"][1] - currentNode["coordinates"][1])
+        return x + y

@@ -9,26 +9,27 @@ class MazeBuilder:
     """
 
     def __init__(self, size: int, walls: int, visibleWalls: bool):
-        self.size = size  # Tamanho do labirinto (ex: 5 → grade 5x5)
-        self.walls = walls  # Quantidade de paredes a inserir aleatoriamente
+        self.size = size         # Tamanho do labirinto (ex: 5 → grade 5x5)
+        self.walls = walls       # Quantidade de paredes a inserir aleatoriamente
         self.visibleWalls = visibleWalls
         self.boostrap()
 
     def boostrap(self):
         # Mapeamento de cada tipo de terreno para sua cor na animação
         self.terrains = {
-            "#": "gray",  # Parede — bloqueio, não pode passar
-            "G": "green",  # Grama — custo baixo para atravessar
-            "L": "brown",  # Lama — custo alto para atravessar
-            "I": "tab:blue",  # Início (Initial) — ponto de partida
-            "F": "tab:blue",  # Fim (Finish) — destino a alcançar
+            "#": "gray",        # Parede — bloqueio, não pode passar
+            "G": "green",       # Grama — custo baixo para atravessar
+            "C": "lightgray",   # Calçada — custo intermediário para atravessar
+            "L": "brown",       # Lama — custo alto para atravessar
+            "I": "tab:blue",    # Início (Initial) — ponto de partida
+            "F": "tab:blue",    # Fim (Finish) — destino a alcançar
         }
 
         # Custo de movimento por tipo de terreno (paredes e pontos especiais têm custo 0)
-        self.costs = {"#": 0, "G": 1, "L": 5, "I": 0, "F": 0}
+        self.costs = {"#": 0, "G": 1, "C": 4, "L": 5, "I": 0, "F": 0}
 
         # Terrenos que podem aparecer aleatoriamente nas células do labirinto
-        self.places = ["G", "L"]
+        self.places = ["G", "C", "L"]
 
         # Posição inicial: canto superior esquerdo [linha 0, coluna 0]
         self.initialPositions = [0, 0]
@@ -37,7 +38,7 @@ class MazeBuilder:
         self.finalPosition = [self.size - 1, self.size - 1]
 
     def createMaze(self):
-        # Preenche a grade com terrenos aleatórios (G ou L)
+        # Preenche a grade com terrenos aleatórios (G, C ou L)
         self.matrix = np.random.choice(self.places, size=(self.size, self.size))
 
         # Define as paredes, início, fim e depois monta o grafo
@@ -103,7 +104,7 @@ class MazeBuilder:
                         index - self.size,
                         terrain=self.matrixFlat[index - self.size],
                         cost=self.costs[self.matrixFlat[index - self.size]],
-                        coordinates=self.__resolveCoordinates(index),
+                        coordinates=self.__resolveCoordinates(index - self.size),  # coordenadas do próprio vizinho
                     )
                     self.maze.add_edge(index, index - self.size)
 
@@ -120,7 +121,7 @@ class MazeBuilder:
                         index + self.size,
                         terrain=self.matrixFlat[index + self.size],
                         cost=self.costs[self.matrixFlat[index + self.size]],
-                        coordinates=self.__resolveCoordinates(index),
+                        coordinates=self.__resolveCoordinates(index + self.size),  # coordenadas do próprio vizinho
                     )
                     self.maze.add_edge(index, index + self.size)
 
@@ -137,7 +138,7 @@ class MazeBuilder:
                         index - 1,
                         terrain=self.matrixFlat[index - 1],
                         cost=self.costs[self.matrixFlat[index - 1]],
-                        coordinates=self.__resolveCoordinates(index),
+                        coordinates=self.__resolveCoordinates(index - 1),  # coordenadas do próprio vizinho
                     )
                     self.maze.add_edge(index, index - 1)
 
@@ -147,14 +148,14 @@ class MazeBuilder:
                     self.maze.add_node(
                         index,
                         terrain=self.matrixFlat[index],
-                        cost=self.matrixFlat[index],
+                        cost=self.costs[self.matrixFlat[index]],
                         coordinates=self.__resolveCoordinates(index),
                     )
                     self.maze.add_node(
                         index + 1,
                         terrain=self.matrixFlat[index + 1],
-                        cost=self.matrixFlat[index + 1],
-                        coordinates=self.__resolveCoordinates(index),
+                        cost=self.costs[self.matrixFlat[index + 1]],  # custo numérico correto (era string antes)
+                        coordinates=self.__resolveCoordinates(index + 1),  # coordenadas do próprio vizinho
                     )
                     self.maze.add_edge(index, index + 1)
 
@@ -163,23 +164,16 @@ class MazeBuilder:
         return 0 <= pos <= self.matrix.shape[0]
 
     def __isWall(self, pos):
-        # Atualmente retorna sempre False — ou seja, as paredes também entram no grafo.
-        # Para excluir paredes do grafo, bastaria remover a linha abaixo e ativar a segunda.
+        # Se visibleWalls=True, paredes entram no grafo (visíveis mas não bloqueiam)
+        # Se visibleWalls=False, paredes são excluídas do grafo completamente
         if self.visibleWalls:
             return False
         else:
             return self.matrixFlat[pos] == "#"
 
     def __resolveCoordinates(self, index):
-        # Converte um índice linear de volta para coordenadas (linha, coluna) na grade
-        row = 0
-        column = 0
-        for i in range(1, index):
-            if i % self.size == 0:
-                row += 1
-                column = 0
-            column += 1
-        return (row, column)
+        # Converte um índice linear para coordenadas (linha, coluna) na grade
+        return (index // self.size, index % self.size)
 
     def getGraph(self):
         # Retorna o grafo montado do labirinto
@@ -192,3 +186,13 @@ class MazeBuilder:
     def showMatrix(self):
         # Imprime a matriz do labirinto no terminal para visualização rápida
         print(self.matrix)
+
+    def showLegend(self):
+        # Exibe a legenda dos tipos de terreno, seus símbolos e custos de movimentação
+        print("\n=== Legenda ===")
+        print("  I = Início   (custo  0) — ponto de partida")
+        print("  F = Fim      (custo  0) — destino")
+        print("  G = Grama    (custo  1) — fácil de atravessar")
+        print("  C = Calçada  (custo  4) — custo intermediário")
+        print("  L = Lama     (custo  5) — difícil de atravessar")
+        print("  # = Parede   (intransponível)\n")

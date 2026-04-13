@@ -20,6 +20,7 @@ maze = MazeBuilder(
 maze.createMaze()  # Gera a matriz do labirinto com terrenos, paredes, início e fim
 
 maze.showMatrix()
+maze.showLegend()  # Exibe a legenda dos tipos de terreno e seus custos
 
 if arguments.strategy == "all":
     for strategy in ["breadth", "depth", "greedy", "astar"]:
@@ -28,15 +29,16 @@ if arguments.strategy == "all":
 
         if strategy:
             metrics.start()
-
             strategy.run()
-            print(strategy.getResolutionPath())
-
             metrics.stop()
             metrics.show()
 
+            # Armazena expansão e caminho para passar à animação
+            expansion = strategy.getExpansionOrder()
+            path = strategy.getResolutionPath()
+
             animtation = MazeResolutionAnimation(
-                maze=maze.getGraph(), path=strategy.getResolutionPath()
+                maze=maze.getGraph(), expansion_order=expansion, path=path
             )
             animtation.run()
 
@@ -47,11 +49,14 @@ else:
     if strategy:
         metrics.start()
         strategy.run()
-
         metrics.stop()
         metrics.show()
 
+        # Armazena expansão e caminho para passar à animação
+        expansion = strategy.getExpansionOrder()
+        path = strategy.getResolutionPath()
+
         animtation = MazeResolutionAnimation(
-            maze=maze.getGraph(), path=strategy.getResolutionPath()
+            maze=maze.getGraph(), expansion_order=expansion, path=path
         )
         animtation.run()

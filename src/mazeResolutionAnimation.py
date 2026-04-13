@@ -5,21 +5,24 @@ from matplotlib import animation
 
 class MazeResolutionAnimation:
     """
-    Gera uma animação gráfica mostrando o labirinto como grafo
-    e destaca, frame a frame, os nós visitados pelo algoritmo de busca.
+    Gera uma animação gráfica em duas fases:
+      Fase 1 — laranja: mostra a ordem em que o algoritmo expandiu os nós
+      Fase 2 — vermelho: destaca o caminho final encontrado do início ao fim
     """
 
-    def __init__(self, maze, path):
-        self.maze = maze  # Grafo do labirinto (nós = células, arestas = conexões)
-        self.path = path  # Lista de nós visitados pelo algoritmo, na ordem de visita
+    def __init__(self, maze, expansion_order, path):
+        self.maze = maze                        # Grafo do labirinto
+        self.expansion_order = expansion_order  # Ordem de expansão dos nós durante a busca
+        self.path = path                        # Caminho final do início ao fim
 
         # Mapeamento de tipos de terreno para cores na visualização
         self.terrains = {
-            "#": "gray",       # Parede
-            "G": "green",      # Grama
-            "L": "brown",      # Lama
-            "I": "tab:blue",   # Início
-            "F": "tab:blue",   # Fim
+            "#": "gray",        # Parede
+            "G": "green",       # Grama
+            "C": "lightgray",   # Calçada
+            "L": "brown",       # Lama
+            "I": "tab:blue",    # Início
+            "F": "tab:blue",    # Fim
         }
 
         # Define a cor inicial de cada nó com base no tipo de terreno armazenado no grafo
@@ -43,13 +46,15 @@ class MazeResolutionAnimation:
             node_color=self.colors,
         )
 
-        # Cria a animação: a cada frame (1 por segundo), chama __animate
-        # para colorir o próximo nó do caminho percorrido
+        # Total de frames = expansão + caminho final
+        total_frames = len(self.expansion_order) + len(self.path)
+
+        # Cria a animação com os dois grupos de frames em sequência
         self.anim = animation.FuncAnimation(
             self.fig,
             self.__animate,
-            frames=len(self.path),  # Total de frames = total de nós visitados
-            interval=1000,          # 1000ms = 1 segundo entre cada frame
+            frames=total_frames,
+            interval=500,           # 500ms entre cada frame
             init_func=self.__initAnimation,
             repeat=False,           # Não repete a animação ao terminar
         )
@@ -62,21 +67,25 @@ class MazeResolutionAnimation:
         pass
 
     def __animate(self, frame):
-        # Chamada a cada frame da animação
-        if frame < len(self.path):
-            self.ax.clear()  # Limpa o desenho anterior
+        self.ax.clear()  # Limpa o desenho anterior
 
-            # Encontra a posição do nó atual na lista de nós do grafo
-            normalizedIndex = list(self.maze.nodes).index(self.path[frame])
-
-            # Pinta o nó atual de laranja para indicar que foi visitado neste passo
+        if frame < len(self.expansion_order):
+            # Fase 1: pinta o nó explorado de laranja (ordem de expansão do algoritmo)
+            node_id = self.expansion_order[frame]
+            normalizedIndex = list(self.maze.nodes).index(node_id)
             self.colors[normalizedIndex] = "orange"
+        else:
+            # Fase 2: pinta o nó do caminho final de vermelho (solução encontrada)
+            path_frame = frame - len(self.expansion_order)
+            node_id = self.path[path_frame]
+            normalizedIndex = list(self.maze.nodes).index(node_id)
+            self.colors[normalizedIndex] = "red"
 
-            # Redesenha o grafo com as cores atualizadas
-            nx.draw(
-                self.maze,
-                pos=self.layout,
-                ax=self.ax,
-                with_labels=True,
-                node_color=self.colors,
-            )
+        # Redesenha o grafo com as cores atualizadas
+        nx.draw(
+            self.maze,
+            pos=self.layout,
+            ax=self.ax,
+            with_labels=True,
+            node_color=self.colors,
+        )
