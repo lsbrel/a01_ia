@@ -22,12 +22,24 @@ maze.createMaze()  # Gera a matriz do labirinto com terrenos, paredes, início e
 maze.showMatrix()
 maze.showLegend()  # Exibe a legenda dos tipos de terreno e seus custos
 
+# Nomes legíveis para exibição na animação
+STRATEGY_LABELS = {
+    "breadth": "Busca em Largura",
+    "depth":   "Busca em Profundidade",
+    "greedy":  "Busca Gulosa",
+    "astar":   "A*",
+}
+
 if arguments.strategy == "all":
-    for strategy in ["breadth", "depth", "greedy", "astar"]:
-        strategyContext = StrategyContext(strategy=strategy)
+    for strategy_key in ["breadth", "depth", "greedy", "astar"]:
+        strategyContext = StrategyContext(strategy=strategy_key)
         strategy = strategyContext.get()(maze=maze)
 
         if strategy:
+            print(f"\n{'─' * 50}")
+            print(f"  {STRATEGY_LABELS[strategy_key]}")
+            print(f"{'─' * 50}")
+
             metrics.start()
             strategy.run()
             metrics.stop()
@@ -38,7 +50,10 @@ if arguments.strategy == "all":
             path = strategy.getResolutionPath()
 
             animtation = MazeResolutionAnimation(
-                maze=maze.getGraph(), expansion_order=expansion, path=path
+                maze=maze.getGraph(),
+                expansion_order=expansion,
+                path=path,
+                strategy_name=STRATEGY_LABELS[strategy_key],
             )
             animtation.run()
 
@@ -47,6 +62,10 @@ else:
     strategy = strategyContext.get()(maze=maze)
 
     if strategy:
+        print(f"\n{'─' * 50}")
+        print(f"  {STRATEGY_LABELS[arguments.strategy]}")
+        print(f"{'─' * 50}")
+
         metrics.start()
         strategy.run()
         metrics.stop()
@@ -57,6 +76,9 @@ else:
         path = strategy.getResolutionPath()
 
         animtation = MazeResolutionAnimation(
-            maze=maze.getGraph(), expansion_order=expansion, path=path
+            maze=maze.getGraph(),
+            expansion_order=expansion,
+            path=path,
+            strategy_name=STRATEGY_LABELS[arguments.strategy],
         )
         animtation.run()

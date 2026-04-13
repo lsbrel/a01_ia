@@ -159,10 +159,6 @@ class MazeBuilder:
                     )
                     self.maze.add_edge(index, index + 1)
 
-    def __positionExists(self, pos):
-        # Verifica se uma posição está dentro dos limites da matriz
-        return 0 <= pos <= self.matrix.shape[0]
-
     def __isWall(self, pos):
         # Se visibleWalls=True, paredes entram no grafo (visíveis mas não bloqueiam)
         # Se visibleWalls=False, paredes são excluídas do grafo completamente
