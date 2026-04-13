@@ -3,56 +3,65 @@ import heapq
 
 class AStarStrategy:
     """
-    Algoritmo A* (A-estrela).
-
-    Combina o custo real acumulado do caminho percorrido (g)
-    com uma estimativa da distância até o destino (heurística h).
-    A fórmula f = g + h garante que o A* encontre o caminho de menor custo.
+    Algoritmo A*
     """
 
     def __init__(self, maze):
+        # Guarda labirinto e gera o grafo a partir dele
         self.maze = maze
         self.graph = self.maze.getGraph()
-        self.visited = []           # Nós expandidos na ordem de exploração
-        self.g_cost = {}            # g(n): menor custo real do início até cada nó
-        self.came_from = {}         # Para reconstruir o caminho ótimo
+        # Guarda nós já visitado
+        self.visited = []
+        # Menor custo real
+        self.g_cost = {}
+        # Guarda caminho que veio
+        self.came_from = {}
+        # Acho final?
         self.finishFound = False
+        # Guarda custo final do caminho
         self.totalCost = 0
 
     def run(self):
+        # Nó inicial e final
         startNode = list(self.graph.nodes(data=True))[0]
         finishNode = list(self.graph.nodes(data=True))[-1]
 
-        # Inicializa o nó inicial com g = seu próprio custo (ou 0, dependendo da convenção)
+        # Custo inicial basicamente custo do primeiro nó
         self.g_cost[startNode[0]] = startNode[1]["cost"]
+        # Nó inicial não tem pai
         self.came_from[startNode[0]] = None
 
-        # Contador para desempate quando dois nós têm o mesmo f(n)
+        # Contador para desempate quando dois nós têm o mesmo valor somando caminho percorrido e caminho faltando, desempata quem chego antes
         counter = 0
 
-        # Heap: (f(n), contador, node_id, node_data) — O(log n) por inserção e remoção
+        # Fila de prioridade
         heap = []
+        # Calcula distancia ate o fim
         h0 = self.__manhattanDistance(startNode[1], finishNode[1])
+
+        # mandamos a fila, custo pra chegar ate o no q tá + custo pra chega ate o fim, desempate e dados do nó 
         heapq.heappush(heap, (self.g_cost[startNode[0]] + h0, counter, startNode[0], startNode[1]))
 
+        # Enqaunto tiver caminho para explorar
         while heap and not self.finishFound:
-            # Retira o nó com menor f da heap — O(log n)
+            # Pega melhor nó, menor g+h (caminho percorrido + caminho q falta)
             f, _, current_id, current_data = heapq.heappop(heap)
 
-            # Pula se já foi expandido (pode estar duplicado na heap)
+            # Ignora repetido
             if current_id in self.visited:
                 continue
 
-            # Marca como expandido
+            # Marca como visitado
             self.visited.append(current_id)
 
-            # Se chegou ao destino, para a busca
+            # Chegou no destino, para
             if self.__isFinish((current_id, current_data)):
                 self.finishFound = True
                 break
 
-            # Explora vizinhos
+            # Olha caminhos possiveis
             for n in self.graph.neighbors(current_id):
+                # pega dados do vizinho
                 content = self.graph.nodes(data=True)[n]
 
                 # Ignora paredes
@@ -63,33 +72,42 @@ class AStarStrategy:
                 if n in self.visited:
                     continue
 
-                # g(vizinho) = g(atual) + custo do vizinho
+                # quanto custa pra chegar nesse vizinho
                 tentative_g = self.g_cost[current_id] + content["cost"]
 
-                # Só adiciona/atualiza se encontrou caminho melhor até este vizinho
+                # Se o caminho atual for melhor em custo doq o caminho que tinhamos antes troca
                 if n not in self.g_cost or tentative_g < self.g_cost[n]:
+                    # Atualiza melhor caminho
                     self.g_cost[n] = tentative_g
                     self.came_from[n] = current_id
 
                     # f(n) = g(n) + h(n)
+                    # Calcula custo ate o final
                     h = self.__manhattanDistance(content, finishNode[1])
+                    # Soma com custo que levou pra chegar
                     f_score = tentative_g + h
 
+                    # Numero de desempate caso mesmo custo
                     counter += 1
+                    # Coloca na fila
                     heapq.heappush(heap, (f_score, counter, n, dict(content)))
 
     def getResolutionPath(self):
-        """Reconstrói o caminho ótimo do início ao fim usando came_from."""
-        # Encontra o nó final
+        # Reconstrói o caminho do início ao fim percorrendo came_from de trás pra frente
         finishNode = list(self.graph.nodes(data=True))[-1]
         finish_id = finishNode[0]
 
-        # Reconstrói o caminho de trás pra frente
+        # Caminho
         path = []
+        # Começa do fim
         current = finish_id
+
+        # Volta até o inicio
         while current is not None:
             path.append(current)
             current = self.came_from.get(current)
+
+        # Inverte o array para ficar do inicio ao fim
         path.reverse()
 
         # Calcula o custo real do caminho ótimo
@@ -102,16 +120,19 @@ class AStarStrategy:
 
         return path
 
+    # Retorna a lista de nós na ordem em que foram expandidos durante a busca
     def getExpansionOrder(self):
-        # Retorna a lista de nós na ordem em que foram expandidos durante a busca
         return self.visited
 
+    # Se o terreno for # é parede
     def __isWall(self, node):
         return node["terrain"] == "#"
 
+    # Se o terreno for F é o final
     def __isFinish(self, node):
         return node[1]["terrain"] == "F"
 
+    # Distância de Manhattan soma das diferenças absolutas das coordenadas x e y
     def __manhattanDistance(self, currentNode, goalNode):
         x = abs(currentNode["coordinates"][0] - goalNode["coordinates"][0])
         y = abs(currentNode["coordinates"][1] - goalNode["coordinates"][1])

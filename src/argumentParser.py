@@ -52,12 +52,12 @@ class ArgumentParser:
             print(f"  Valor inválido. Informe um número entre 0 e {maxWalls}.\n")
 
     def __askVisibleWalls(self):
-        # Pergunta se as paredes devem aparecer visíveis no grafo (s/n)
+        # Pergunta se as paredes devem aparecer no grafo (s/n)
         while True:
             raw = input("Paredes visíveis no grafo? (s/n): ").strip().lower()
             if raw in ("s", "n"):
                 return raw == "s"
-            print("  Resposta inválida. Digite 's' para sim ou 'n' para não.\n")
+            print("Resposta inválida. Digite 's' para sim ou 'n' para não.\n")
 
     def __askStrategy(self):
         # Exibe as opções de algoritmo e aguarda uma escolha válida

@@ -3,42 +3,41 @@ import networkx as nx
 
 
 class MazeBuilder:
-    """
-    Constrói o labirinto: gera a matriz com terrenos aleatórios,
-    posiciona as paredes, define o início/fim e monta o grafo de conexões entre células.
-    """
 
     def __init__(self, size: int, walls: int, visibleWalls: bool):
-        self.size = size         # Tamanho do labirinto (ex: 5 → grade 5x5)
-        self.walls = walls       # Quantidade de paredes a inserir aleatoriamente
+        # Tamanho do labirinto
+        self.size = size
+        # Quantidade de paredes
+        self.walls = walls
+        # Visivel as paredes
         self.visibleWalls = visibleWalls
         self.boostrap()
 
     def boostrap(self):
         # Mapeamento de cada tipo de terreno para sua cor na animação
         self.terrains = {
-            "#": "gray",        # Parede — bloqueio, não pode passar
-            "G": "green",       # Grama — custo baixo para atravessar
-            "C": "lightgray",   # Calçada — custo intermediário para atravessar
-            "L": "brown",       # Lama — custo alto para atravessar
-            "I": "tab:blue",    # Início (Initial) — ponto de partida
-            "F": "tab:blue",    # Fim (Finish) — destino a alcançar
+            "#": "gray",
+            "G": "green",
+            "C": "lightgray",
+            "L": "brown",
+            "I": "tab:blue",
+            "F": "tab:blue",
         }
 
-        # Custo de movimento por tipo de terreno (paredes e pontos especiais têm custo 0)
+        # Custo de movimento por tipo de terreno
         self.costs = {"#": 0, "G": 1, "C": 4, "L": 5, "I": 0, "F": 0}
 
-        # Terrenos que podem aparecer aleatoriamente nas células do labirinto
+        # Terrenos que podem aparecer aleatoriamente
         self.places = ["G", "C", "L"]
 
-        # Posição inicial: canto superior esquerdo [linha 0, coluna 0]
+        # Posição inicial
         self.initialPositions = [0, 0]
 
-        # Posição final: canto inferior direito
+        # Posição final
         self.finalPosition = [self.size - 1, self.size - 1]
 
     def createMaze(self):
-        # Preenche a grade com terrenos aleatórios (G, C ou L)
+        # Preenche a grade com terrenos aleatórios
         self.matrix = np.random.choice(self.places, size=(self.size, self.size))
 
         # Define as paredes, início, fim e depois monta o grafo
@@ -47,7 +46,7 @@ class MazeBuilder:
         self.__defineGraph()
 
     def __defineStartAndFinish(self):
-        # Marca a célula [0][0] como início (I) e a última célula como fim (F)
+        # Marca a célula [0][0] como início e a última célula como fim
         self.matrix[0][0] = "I"
         self.matrix[self.size - 1][self.size - 1] = "F"
 
@@ -60,26 +59,25 @@ class MazeBuilder:
 
     def __defineGraph(self):
         # Cria um grafo onde cada célula do labirinto é um nó
-        # e as arestas conectam células vizinhas (cima, baixo, esquerda, direita)
         self.maze = nx.Graph()
 
         # Transforma a matriz 2D em uma lista linear para facilitar o acesso por índice
         self.matrixFlat = self.matrix.flatten()
 
-        # Índice da última célula da primeira linha (limite superior para conexão vertical para cima)
+        # Índice da última célula da primeira linha
         firstRow = len(self.matrix) - 1
 
-        # Índice da primeira célula da última linha (limite inferior para conexão vertical para baixo)
+        # Índice da primeira célula da última linha
         lastRow = len(self.matrix) * (len(self.matrix) - 1)
 
-        # Índices das células na primeira coluna (não têm vizinho à esquerda)
+        # Índices das células na primeira coluna não têm vizinho na esquerda
         firstColumn = [
             index
             for index, num in enumerate(range(len(self.matrixFlat)))
             if index % self.size == 0
         ]
 
-        # Índices das células na última coluna (não têm vizinho à direita)
+        # Índices das células na última coluna não têm vizinho na direita
         lastColumn = [
             index + (self.size - 1)
             for index, _ in enumerate(range(len(self.matrixFlat)))
@@ -88,8 +86,9 @@ class MazeBuilder:
 
         # Percorre cada célula da matriz linearizada para criar nós e arestas no grafo
         for index, value in enumerate(self.matrixFlat):
+             # Pula paredes
             if self.__isWall(index):
-                continue  # Pula paredes — elas não participam do grafo de caminhos
+                continue
 
             # Tenta conectar com a célula de cima (índice - size)
             if index > firstRow:
@@ -104,11 +103,11 @@ class MazeBuilder:
                         index - self.size,
                         terrain=self.matrixFlat[index - self.size],
                         cost=self.costs[self.matrixFlat[index - self.size]],
-                        coordinates=self.__resolveCoordinates(index - self.size),  # coordenadas do próprio vizinho
+                        coordinates=self.__resolveCoordinates(index - self.size),
                     )
                     self.maze.add_edge(index, index - self.size)
 
-            # Tenta conectar com a célula de baixo (índice + size)
+            # Tenta conectar com a célula de baixo
             if index < lastRow:
                 if not self.__isWall(index + self.size):
                     self.maze.add_node(
@@ -121,11 +120,11 @@ class MazeBuilder:
                         index + self.size,
                         terrain=self.matrixFlat[index + self.size],
                         cost=self.costs[self.matrixFlat[index + self.size]],
-                        coordinates=self.__resolveCoordinates(index + self.size),  # coordenadas do próprio vizinho
+                        coordinates=self.__resolveCoordinates(index + self.size),
                     )
                     self.maze.add_edge(index, index + self.size)
 
-            # Tenta conectar com a célula à esquerda (índice - 1), se não estiver na primeira coluna
+            # Tenta conectar com a célula à esquerda
             if index not in firstColumn:
                 if not self.__isWall(index - 1):
                     self.maze.add_node(
@@ -138,11 +137,11 @@ class MazeBuilder:
                         index - 1,
                         terrain=self.matrixFlat[index - 1],
                         cost=self.costs[self.matrixFlat[index - 1]],
-                        coordinates=self.__resolveCoordinates(index - 1),  # coordenadas do próprio vizinho
+                        coordinates=self.__resolveCoordinates(index - 1),
                     )
                     self.maze.add_edge(index, index - 1)
 
-            # Tenta conectar com a célula à direita (índice + 1), se não estiver na última coluna
+            # Tenta conectar com a célula à direita
             if index not in lastColumn:
                 if not self.__isWall(index + 1):
                     self.maze.add_node(
@@ -154,14 +153,14 @@ class MazeBuilder:
                     self.maze.add_node(
                         index + 1,
                         terrain=self.matrixFlat[index + 1],
-                        cost=self.costs[self.matrixFlat[index + 1]],  # custo numérico correto (era string antes)
-                        coordinates=self.__resolveCoordinates(index + 1),  # coordenadas do próprio vizinho
+                        cost=self.costs[self.matrixFlat[index + 1]],
+                        coordinates=self.__resolveCoordinates(index + 1),
                     )
                     self.maze.add_edge(index, index + 1)
 
     def __isWall(self, pos):
-        # Se visibleWalls=True, paredes entram no grafo (visíveis mas não bloqueiam)
-        # Se visibleWalls=False, paredes são excluídas do grafo completamente
+        # Se visibleWalls=True, paredes entram
+        # Se visibleWalls=False, paredes são excluídas
         if self.visibleWalls:
             return False
         else:
@@ -180,15 +179,15 @@ class MazeBuilder:
         return self.matrix
 
     def showMatrix(self):
-        # Imprime a matriz do labirinto no terminal para visualização rápida
+        # Imprime a matriz do labirinto
         print(self.matrix)
 
     def showLegend(self):
-        # Exibe a legenda dos tipos de terreno, seus símbolos e custos de movimentação
+        # Exibe a legenda dos tipos de terreno
         print("\n=== Legenda ===")
-        print("  I = Início   (custo  0) — ponto de partida")
-        print("  F = Fim      (custo  0) — destino")
-        print("  G = Grama    (custo  1) — fácil de atravessar")
-        print("  C = Calçada  (custo  4) — custo intermediário")
-        print("  L = Lama     (custo  5) — difícil de atravessar")
-        print("  # = Parede   (intransponível)\n")
+        print("  I = Início   (custo  0)")
+        print("  F = Fim      (custo  0)")
+        print("  G = Grama    (custo  1)")
+        print("  C = Calçada  (custo  4)")
+        print("  L = Lama     (custo  5)")
+        print("  # = Parede\n")

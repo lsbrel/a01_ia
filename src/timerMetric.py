@@ -2,11 +2,6 @@ import time
 
 
 class TimerMetric:
-    """
-    Cronômetro simples para medir quanto tempo o algoritmo de busca levou
-    para encontrar o caminho no labirinto.
-    """
-
     def __init__(self):
         self.init = 0    # Momento em que o cronômetro foi iniciado
         self.result = 0  # Tempo total decorrido (em segundos)

@@ -1,72 +1,81 @@
 from collections import deque
 
-
 class BreadthFirstSearchStrategy:
     """
     Busca em Largura
-
-    Explora o labirinto nível por nível: visita todos os vizinhos do nó atual
-    antes de avançar para os vizinhos dos vizinhos.
     """
 
     def __init__(self, maze):
-        self.maze = maze                # Labirinto com o grafo e a matriz
-        self.graph = self.maze.getGraph()  # Grafo do labirinto
-        self.visited = []               # Lista de nós visitados na ordem de exploração
-        self.came_from = {}             # Para reconstruir o caminho: nó → de onde veio
+          # Guarda labirinto e gera o grafo a partir dele
+        self.maze = maze
+        self.graph = self.maze.getGraph()
+
+        # Guarda nós já visitado
+        self.visited = []
+        # Guarda caminho que veio
+        self.came_from = {}
+        # Guarda custo final do caminho
         self.totalCost = 0
 
     def run(self):
+        #  Pega o primeiro nó da lista
         startNode = list(self.graph.nodes(data=True))[0]
 
-        # Fila de nós a visitar começa pelo primeiro nó (canto superior esquerdo)
-        nodesToVisit = deque()  # Cria lista otimizada para inserção e remoção de elementos
+        # Cria a fila
+        nodesToVisit = deque()
+        # Adiciona o primeiro nó na fila
         nodesToVisit.append(startNode)
-        self.came_from[startNode[0]] = None  # Nó inicial não tem pai
+        # Nó inicial não tem pai
+        self.came_from[startNode[0]] = None
 
+        # Enquanto tiver caminho na fila continua
         while len(nodesToVisit) != 0:
-            # Retira o nó mais antigo da fila
-            # O primeiro nó adicionado será o próximo a ser explorado
-            current = nodesToVisit.popleft()  # Remove o primeiro nó da lista
+            # pega o primeiro nó que entrou continua do caminho mais recente smp
+            current = nodesToVisit.popleft()
 
-            # Só processa se ainda não visitou este nó (nó pode ter sido visitado em outro caminho)
+            # Ja visitou ignora
             if current[0] in self.visited:
                 continue
 
-            # Ignora paredes não podem ser atravessadas
+            # Ignora parede
             if self.__isWall(current):
                 continue
 
-            # Marca o nó como visitado
+            # Marca como visitado
             self.visited.append(current[0])
 
+            # Pega caminhos vizinhos possiveis
             neighbors = list(self.graph.neighbors(current[0]))
 
-            # Se chegou ao destino, para a busca
+            # Chegou no destino, para
             if self.__isFinish(current):
                 break
 
-            # Adiciona todos os vizinhos à fila para serem explorados depois
+            # pra cada vizinho
             for i in neighbors:
-                # Registra de onde cada vizinho foi alcançado (apenas na primeira vez)
-                # BFS garante que a primeira vez é sempre pelo caminho mais curto
+                # Marca de onde veio caso seja primeira vez
                 if i not in self.came_from:
                     self.came_from[i] = current[0]
                 nodesToVisit.append((i, self.graph.nodes[i]))
 
     def getResolutionPath(self):
-        # Reconstrói o caminho do início ao fim percorrendo came_from de trás pra frente
+        # Pega o ultimo nó da lista
         finishNode = list(self.graph.nodes(data=True))[-1]
         finish_id = finishNode[0]
 
+        # caminho
         path = []
+        # Começa do fim
         current = finish_id
+        # Volta até o inicio
         while current is not None:
             path.append(current)
             current = self.came_from.get(current)
+        
+        # Inverte o array para ficar do inicio ao fim
         path.reverse()
 
-        # Calcula o custo real somando apenas os nós que fazem parte do caminho
+        # Somaa custo do caminho
         self.totalCost = sum(self.graph.nodes[n]["cost"] for n in path)
 
         print(f"Nós expandidos (busca em largura): {len(self.visited)}")
@@ -75,14 +84,14 @@ class BreadthFirstSearchStrategy:
         print(f"Custo do caminho para busca em largura: {self.totalCost}")
         return path
 
+    # Retorna a lista de nós na ordem em que foram expandidos durante a busca
     def getExpansionOrder(self):
-        # Retorna a lista de nós na ordem em que foram expandidos durante a busca
         return self.visited
 
+    # Se o terreno for # é parede
     def __isWall(self, node):
-        # Verifica se o nó é uma parede ("#")
         return node[1]["terrain"] == "#"
 
+    # Se o terreno for F é o final
     def __isFinish(self, node):
-        # Verifica se o nó é o destino final ("F")
         return node[1]["terrain"] == "F"

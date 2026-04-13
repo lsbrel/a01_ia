@@ -5,31 +5,34 @@ from matplotlib import animation
 
 
 class MazeResolutionAnimation:
-    """
-    Gera uma animação gráfica em duas fases:
-      Fase 1 — laranja: mostra a ordem em que o algoritmo expandiu os nós
-      Fase 2 — vermelho: destaca o caminho final encontrado do início ao fim
-
-    A janela exibe também a legenda de cores e o passo atual da animação.
-    """
 
     def __init__(self, maze, expansion_order, path, strategy_name=""):
-        self.maze = maze                        # Grafo do labirinto
-        self.expansion_order = expansion_order  # Ordem de expansão dos nós durante a busca
-        self.path = path                        # Caminho final do início ao fim
-        self.strategy_name = strategy_name      # Nome legível do algoritmo em uso
+        # Grafo do labirinto
+        self.maze = maze                      
+        # Ordem de expansão dos nós durante a busca  
+        self.expansion_order = expansion_order
+        # Caminho final do início ao fim
+        self.path = path
+        # Nome legível do algoritmo em uso
+        self.strategy_name = strategy_name
 
         # Mapeamento de tipos de terreno para cores na visualização
         self.terrains = {
-            "#": "gray",        # Parede
-            "G": "green",       # Grama
-            "C": "lightgray",   # Calçada
-            "L": "brown",       # Lama
-            "I": "tab:blue",    # Início
-            "F": "tab:blue",    # Fim
+            # Parede
+            "#": "gray",
+            # Grama      
+            "G": "green",
+            # Calçada    
+            "C": "lightgray",
+            # Lama   
+            "L": "brown",
+            # Início
+            "I": "tab:blue",
+            # Fim
+            "F": "tab:blue",
         }
 
-        # Define a cor inicial de cada nó com base no tipo de terreno armazenado no grafo
+        # Define a cor de cada nó com base no terreno
         self.colors = [
             self.terrains[node[1]["terrain"]] for node in self.maze.nodes(data=True)
         ]
@@ -50,7 +53,7 @@ class MazeResolutionAnimation:
             node_color=self.colors,
         )
 
-        # Nome do algoritmo fixo no topo da figura — persiste em todos os frames
+        # Titulo
         self.fig.suptitle(f"Algoritmo: {self.strategy_name}", fontsize=13, fontweight="bold")
 
         # Exibe legenda e título iniciais antes da animação começar
@@ -65,16 +68,16 @@ class MazeResolutionAnimation:
             self.fig,
             self.__animate,
             frames=total_frames,
-            interval=500,           # 500ms entre cada frame
+            interval=500, # Intervalo de cada animação
             init_func=self.__initAnimation,
-            repeat=False,           # Não repete a animação ao terminar
+            repeat=False, # Não repete a animação ao terminar
         )
 
-        # Abre a janela gráfica com a animação
+        # Abre a janela da animação
         plt.show()
 
     def __initAnimation(self):
-        # Função de inicialização da animação (vazia — estado inicial já foi desenhado em run())
+        # Função de inicialização da animação
         pass
 
     def __animate(self, frame):
@@ -100,7 +103,7 @@ class MazeResolutionAnimation:
             normalizedIndex = list(self.maze.nodes).index(node_id)
             self.colors[normalizedIndex] = "red"
 
-            # Título indica que estamos desenhando o caminho final
+            # Título indica caminho final
             step = path_frame + 1
             total = len(self.path)
             self.ax.set_title(
@@ -117,7 +120,7 @@ class MazeResolutionAnimation:
             node_color=self.colors,
         )
 
-        # Redesenha a legenda (é apagada pelo ax.clear() a cada frame)
+        # Redesenha a legenda
         self.__drawLegend()
 
     def __drawLegend(self):
@@ -132,7 +135,7 @@ class MazeResolutionAnimation:
             mpatches.Patch(color="red",       label="Caminho final (fase 2)"),
         ]
 
-        # Posiciona a legenda fora da área do grafo, no canto inferior direito
+        # Posiciona a legenda fora da área do grafo
         self.ax.legend(
             handles=legend_entries,
             loc="lower right",
